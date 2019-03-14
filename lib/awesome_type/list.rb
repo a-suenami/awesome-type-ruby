@@ -1,5 +1,5 @@
 module AwesomeType
-  class Optional
+  class List
     def self.[](type)
       @type = type
     end
