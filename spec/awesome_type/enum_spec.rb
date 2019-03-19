@@ -17,8 +17,8 @@ RSpec.describe AwesomeType::Enum do
   class Direction < AwesomeType::Enum
     define :North, :South, :East, :West
 
-    # def opposite_direction
-    # end
+    def opposite_direction
+    end
 
     # public Direction getOppositeDirection() {
     #   return VALUES[(ordinal() + 2) % 4];
@@ -46,5 +46,9 @@ RSpec.describe AwesomeType::Enum do
 
   it 'can\'t directly use the constructor' do
     expect{ Direction.new(5) }.to raise_error NoMethodError, "private method `new' called for Direction:Class"
+  end
+
+  it '' do
+    Direction.value_of(1)
   end
 end

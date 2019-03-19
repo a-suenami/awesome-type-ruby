@@ -32,5 +32,12 @@ module AwesomeType
     def initialize(value)
       @value = value
     end
+
+    def value_of(name)
+      key = key.to_i if ordinal?
+      @@enums.find do |enum_name, _|
+        enum_name == name
+      end
+    end
   end
 end
