@@ -1,77 +1,36 @@
 module AwesomeType
-  module Enum
-    def self.included(base)
-      base.extend(ClassMethods)
-    end
+  class Enum
+    private_class_method :new
 
-    module ClassMethods
-      attr_reader :type, :enums, :enums_names
-
-      def enums_ordinal(*enums)
-        @type = :ordinal
-        @enums = enums.map.with_index do |e, i|
-          hash = { key: i + 1, order: i }
-          if e.is_a?(Array)
-            hash[:name] = e.first
-            hash.merge!(e.second || {})
-          else
-            hash[:name] = e
+    class << self
+      def define(*enums)
+        @@enums ||= {}
+        if enums.size == 1 && enums.first.is_a?(Hash)
+          enums.first.each do |name, value|
+            @@enums[name.to_sym] = value
           end
-          hash[:lower_name] = hash[:name].downcase
-
-          OpenStruct.new(hash)
-        end
-        @enums_names = Hash[@enums.map { |e| [e.name, e] }]
-      end
-
-      def enums_string(*enums)
-        @type = :string
-        @enums = enums.map.with_index do |e, i|
-          hash = { order: i }
-          if e.is_a?(Array)
-            hash[:name] = e.first
-            hash.merge!(e.second || {})
-          else
-            hash[:name] = e
+        elsif enums.all?{|enum| enum.is_a?(String) || enum.is_a?(Symbol) }
+          enums.each.with_index(1) do |name, i|
+            @@enums[name.to_sym] = i
           end
-          hash[:key] = hash[:name].to_s
-          hash[:lower_name] = hash[:name].downcase
-
-          OpenStruct.new(hash)
+        else
+          raise 'Invalid enum definitions.'
         end
-        @enums_names = Hash[@enums.map { |e| [e.name, e] }]
       end
 
       def method_missing(name, *args)
-        if !args.present? && enums_names[name.to_sym]
-          enums_names[name.to_sym]
+        if args.empty? && @@enums[name.to_sym]
+          new(@@enums[name.to_sym])
         else
           super
         end
       end
+    end
 
-      def ordinal?
-        @type == :ordinal
-      end
+    attr_reader :value
 
-      def string?
-        @type == :string
-      end
-
-      def values
-        enums
-      end
-
-      def value_of(key)
-        key = key.to_i if ordinal?
-        values.find do |v|
-          v.key == key
-        end
-      end
-
-      def index_of(key)
-        values.index { |v| v.key == key }
-      end
+    def initialize(value)
+      @value = value
     end
   end
 end
